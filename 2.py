@@ -1,7 +1,7 @@
 # импортируем библиотеки
 from flask import Flask, request
 import logging
-
+import os
 # библиотека, которая нам понадобится для работы с JSON
 import json
 
@@ -95,9 +95,7 @@ def handle_dialog(req, res):
         'хорошо'
     ]:
         # Пользователь согласился, прощаемся.
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
-        res['response']['end_session'] = True
-        return
+        res['response']['text'] = 'А теперь купи кролика!!'
 
     # Если нет, то убеждаем его купить слона!
     res['response']['text'] = \
