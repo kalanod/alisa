@@ -1,11 +1,11 @@
 # импортируем библиотеки
-import os
-
 from flask import Flask, request
 import logging
 
 # библиотека, которая нам понадобится для работы с JSON
 import json
+import os
+
 
 # создаём приложение
 # мы передаём __name__, в нем содержится информация, 
@@ -96,8 +96,11 @@ def handle_dialog(req, res):
         'покупаю',
         'хорошо'
     ] or any([i in req['request']['original_utterance'].lower() for i in ['куплю', 'покупаю']]):
+    ]:
         # Пользователь согласился, прощаемся.
-        res['response']['text'] = 'Это хорошо, а теперь купи кролика!'
+        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
+        res['response']['end_session'] = True
+        return
 
     # Если нет, то убеждаем его купить слона!
     res['response']['text'] = \
