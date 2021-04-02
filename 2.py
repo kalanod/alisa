@@ -97,7 +97,7 @@ def handle_dialog(req, res):
         'хорошо'
     ] or any([i in req['request']['original_utterance'].lower() for i in ['куплю', 'покупаю']]):
         # Пользователь согласился, прощаемся.
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
+        res['response']['text'] = 'А теперь купи кролика!'
         res['response']['end_session'] = True
         return
 
