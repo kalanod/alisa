@@ -1,29 +1,9 @@
 import math
 import os
-
 from flask import Flask, request
 import logging
 import json
 import requests
-
-# импортируем функции из нашего второго файла geo
-
-app = Flask(__name__)
-
-# Добавляем логирование в файл.
-# Чтобы найти файл, перейдите на pythonwhere в раздел files,
-# он лежит в корневой папке
-logging.basicConfig(level=logging.INFO, filename='app.log',
-                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
-
-
-def get_cities(req):
-    cities = []
-    for entity in req['request']['nlu']['entities']:
-        if entity['type'] == 'YANDEX.GEO':
-            if 'city' in entity['value']:
-                cities.append(entity['value']['city'])
-    return cities
 
 
 def get_coordinates(city_name):
@@ -57,6 +37,22 @@ def get_coordinates(city_name):
         return e
 
 
+def get_country(city_name):
+    try:
+        url = "https://geocode-maps.yandex.ru/1.x/"
+        params = {
+            "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+            'geocode': city_name,
+            'format': 'json'
+        }
+        data = requests.get(url, params).json()
+        # все отличие тут, мы получаем имя страны
+        return data['response']['GeoObjectCollection'][
+            'featureMember'][0]['GeoObject']['metaDataProperty'][
+            'GeocoderMetaData']['AddressDetails']['Country']['CountryName']
+    except Exception as e:
+        return e
+
 def get_distance(p1, p2):
     # p1 и p2 - это кортежи из двух элементов - координаты точек
     radius = 6373.0
@@ -75,22 +71,14 @@ def get_distance(p1, p2):
     distance = radius * c
     return distance
 
+# импортируем функции из нашего второго файла geo
+app = Flask(__name__)
 
-def get_country(city_name):
-    try:
-        url = "https://geocode-maps.yandex.ru/1.x/"
-        params = {
-            "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
-            'geocode': city_name,
-            'format': 'json'
-        }
-        data = requests.get(url, params).json()
-        # все отличие тут, мы получаем имя страны
-        return data['response']['GeoObjectCollection'][
-            'featureMember'][0]['GeoObject']['metaDataProperty'][
-            'GeocoderMetaData']['AddressDetails']['Country']['CountryName']
-    except Exception as e:
-        return e
+# Добавляем логирование в файл.
+# Чтобы найти файл, перейдите на pythonwhere в раздел files,
+# он лежит в корневой папке
+logging.basicConfig(level=logging.INFO, filename='app.log',
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
 
 @app.route('/post', methods=['POST'])
@@ -128,6 +116,15 @@ def handle_dialog(res, req):
                                   str(round(distance)) + ' км.'
     else:
         res['response']['text'] = 'Слишком много городов!'
+
+
+def get_cities(req):
+    cities = []
+    for entity in req['request']['nlu']['entities']:
+        if entity['type'] == 'YANDEX.GEO':
+            if 'city' in entity['value']:
+                cities.append(entity['value']['city'])
+    return cities
 
 
 if __name__ == '__main__':
